@@ -5,7 +5,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 import { Route, Routes } from 'react-router-dom'
-import { Router } from './router'
+import { Router } from './Router'
 
 import { Login } from './pages'
 
