@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import { Register } from '../Register/Register';
 
 export const UserProfile = () => {
   const { id } = useParams();

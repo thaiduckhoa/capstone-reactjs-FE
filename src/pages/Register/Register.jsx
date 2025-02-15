@@ -5,13 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import dayjs from "dayjs";
 import {RegisterSchema} from './Register.schema';
+import { authServices } from '../../services/Auth.services';
 
 import { UserTemplate } from '../../templates/UserTemplate/UserTemplate';
 
-
-
 export const Register = () => {
-
     const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors }, setValue } = useForm({
         resolver: zodResolver(RegisterSchema),
@@ -20,28 +18,19 @@ export const Register = () => {
 
     const onSubmit = async (data) => {
         const formattedData = {
-
             ...data,
             gender: data.gender === "Male",
-
-
         };
-        console.log(formattedData);
 
         try {
-            const response = await fetch('https://fiverrnew.cybersoft.edu.vn/api/auth/sigup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formattedData),
-            });
-
-            if (response.ok) {
+            const response = await authServices().signup(formattedData);
+            
+            if (response.status === 200) {
                 message.success("Registration successful!");
-                navigate('/login');
+                navigate('/userprofile');
             } else {
-                const errorData = await response.json();
-                console.error('Registration error:', errorData);
-                message.error('Registration failed! Please check details.');
+                console.error('Registration error:', response.data);
+                message.error(response.data?.message || 'Registration failed! Please check details.');
             }
         } catch (error) {
             console.error('Registration error:', error);
@@ -50,8 +39,6 @@ export const Register = () => {
     };
 
     return (
-        
-      
         <div className='my-10 '>
             <div className="h-[150vh] items-center flex justify-center px-5 lg:px-0">
                 <div className="max-w-screen-xl bg-white border shadow sm:rounded-lg flex justify-center flex-1">
@@ -66,7 +53,6 @@ export const Register = () => {
                                     <div className="mx-auto max-w-xs flex flex-col gap-3">
                                         {/* Username */}
                                         <div>
-
                                             <div className=' flex items-center gap-3'>
                                                 <i className="fa-solid fa-user"></i>
                                                 <input
@@ -77,7 +63,6 @@ export const Register = () => {
                                                 />
                                             </div>
                                             {errors.name && <p className="text-red-500 text-xs ml-6">{errors.name.message}</p>}
-
                                         </div>
 
                                         {/* Email */}
@@ -92,7 +77,6 @@ export const Register = () => {
                                                 />
                                             </div>
                                             {errors.email && <p className="text-red-500 text-xs ml-6">{errors.email.message}</p>}
-
                                         </div>
 
                                         {/* Phone */}
@@ -106,10 +90,8 @@ export const Register = () => {
                                                     placeholder="Enter your phone"
                                                 />
                                             </div>
-
                                             {errors.phone && <p className="text-red-500 text-xs ml-6">{errors.phone.message}</p>}
                                         </div>
-
 
                                         {/* Password */}
                                         <div>
@@ -125,7 +107,6 @@ export const Register = () => {
                                             {errors.password && <p className="text-red-500 text-xs ml-6">{errors.password.message}</p>}
                                         </div>
 
-
                                         {/* Confirm Password */}
                                         <div>
                                             <div className='flex items-center gap-3'>
@@ -140,7 +121,6 @@ export const Register = () => {
                                             {errors.confirmPassword && <p className="text-red-500 text-xs ml-6">{errors.confirmPassword.message}</p>}
                                         </div>
 
-
                                         {/* Birthday */}
                                         <div>
                                             <div className='flex items-center gap-3'>
@@ -152,51 +132,6 @@ export const Register = () => {
                                                 />
                                             </div>
                                             {errors.birthday && <p className="text-red-500 text-xs ml-6">{errors.birthday.message}</p>}
-                                        </div>
-
-
-                                        {/* Role */}
-                                        <div>
-                                            <div className='flex items-center gap-3'>
-                                                <i className="fa-solid fa-gear"></i>
-                                                <input
-                                                    {...register('role')}
-                                                    className="w-full px-5 py-3 rounded-lg bg-gray-100 border placeholder-gray-500 text-sm focus:outline-none"
-                                                    type="text"
-                                                    placeholder="Enter your role"
-                                                />
-                                            </div>
-
-                                            {errors.role && <p className="text-red-500 text-xs ml-6">{errors.role.message}</p>}
-                                        </div>
-
-                                        {/* skill */}
-                                        <div>
-                                            {/* <div className='flex items-center gap-3'>
-                                                <i className="fa-solid fa-pen"></i>                                                <input
-                                                    {...register('skill')}
-                                                    className="w-full px-5 py-3 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                                    type="text"
-                                                    placeholder="Your skill"
-                                                />
-                                            </div>
-                                            {errors.skill && <p className="text-red-500 text-xs ml-6">{errors.skill.message}</p>} */}
-                                        </div>
-
-
-
-                                        {/* certification */}
-
-                                        <div>
-                                            {/* <div className='flex items-center gap-3'>
-                                                <i className="fa-regular fa-note-sticky"></i>                                                <input
-                                                    {...register('certification')}
-                                                    className="w-full px-5 py-3 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                                    type="text"
-                                                    placeholder="Your certification"
-                                                />
-                                            </div>
-                                            {errors.certification && <p className="text-red-500 text-xs ml-6">{errors.certification.message}</p>} */}
                                         </div>
 
                                         {/* Gender */}
@@ -244,6 +179,5 @@ export const Register = () => {
                 </div>
             </div>
         </div>
-            
     );
 };
