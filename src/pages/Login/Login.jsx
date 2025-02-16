@@ -1,113 +1,96 @@
-import React from 'react';
-import { message } from 'antd';
-import { z } from 'zod';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { authServices } from '../../services/AuthServices.jsx';
+import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { authServices } from '../../services/Auth.services';
-import Footer from '../../components/Footer/Footer';
 
 const LoginSchema = z.object({
-    email: z.string().email({ message: "Please fill valid email" }),
-    password: z.string().min(1, { message: "Please fill password" }),
+    email: z.string()
+       .min(1, { message: "Email is required" })
+        .email({ message: "Invalid email address" }),
+    password: z.string()
+       .min(1, { message: "Password is required" })
 });
 
 export const Login = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const { register, handleSubmit, formState: { errors } } = useForm({
-        resolver: zodResolver(LoginSchema)
+       resolver: zodResolver(LoginSchema)
     });
 
     const onSubmit = async (data) => {
+        setLoading(true);
         try {
-            const response = await authServices().login(data);
-            
-            if (response.status === 200) {
-                message.success("Login successful!");
-                navigate('/userprofile');
-            } else {
-                console.error('Login error:', response.data);
-                message.error(response.data?.message || 'Login failed! Please check details.');
+            const response = await authServices.Login(data);
+            // Store token if needed
+            if (response.token) {
+                localStorage.setItem('authToken', response.token);
             }
+
+
+            message.success("Login successful!");
+            navigate('/userprofile');
         } catch (error) {
-            console.error('Login error:', error);
-            message.error('Login failed! Please try again later.');
+            message.error(error.message || 'Login failed! Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div>
-            <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
-                <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-                    <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
-                        <div className="mt-12 flex flex-col items-center">
-                            <h1 className="text-2xl xl:text-3xl font-extrabold text-[#188652]">
-                                Sign In
-                            </h1>
-                            <div className="w-full flex-1 mt-8">
-                                <form onSubmit={handleSubmit(onSubmit)}>
-                                    <div className="mx-auto max-w-xs">
-                                        <input
-                                            {...register('email')}
-                                            className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                                            type="text"
-                                            placeholder="Email"
-                                        />
-                                        {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-
-                                        <input
-                                            {...register('password')}
-                                            className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                                            type="password"
-                                            placeholder="Password"
-                                        />
-                                        {errors.password && <p className="text-red-500">{errors.password.message}</p>}
-
-                                        <button 
-                                            type="submit"
-                                            className="mt-5 tracking-wide font-semibold bg-[#1dbf73] text-gray-100 w-full py-4 rounded-lg hover:bg-[#188652] transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
-                                        >
-                                            <i className="fa-regular fa-user"></i>
-                                            <span className="ml-3">Login</span>
-                                        </button>
-
-                                        <div className="flex items-center justify-between pb-6 mt-3">
-                                            <p className="mb-0 mr-2">Don't have an account?</p>
-                                            <div className='flex gap-2 rounded border-2 border-danger px-6 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-danger transition duration-150 ease-in-out hover:border-danger-600 hover:bg-green-500 hover:bg-opacity-10 hover:text-danger-600'>
-                                                <svg
-                                                    className="w-6 h-6"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                                                    <circle cx="8.5" cy="7" r="4" />
-                                                    <path d="M20 8v6M23 11h-6" />
-                                                </svg>
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => navigate('/register')}
-                                                >
-                                                    Register
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+                <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    {/* Email Field */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Email</label>
+                       <input
+                           {...register('email')}
+                            className="w-full px-3 py-2 border rounded-lg"
+                          type="email"
+                           placeholder="Enter your email"
+                       />
+                        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                     </div>
-                    <div className="flex-1 bg-indigo-100 text-center hidden lg:flex">
-                        <div 
-                            className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat" 
-                            style={{ backgroundImage: 'url("https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg")' }}
-                        ></div>
+
+                    {/* Password Field */}
+                   <div>
+                        <label className="block text-sm font-medium mb-1">Password</label>
+                        <input
+                           {...register('password')}
+                            className="w-full px-3 py-2 border rounded-lg"
+                            type="password"
+                            placeholder="Enter password"
+                        />
+                        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
                     </div>
-                </div>
+
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                        disabled={loading}
+                    >
+                        {loading ? 'Logging in...' : 'Login'}
+                    </button>
+
+                    {/* Register Link */}
+                    <div className="text-center mt-4">
+                        <span className="text-gray-600">Don't have an account? </span>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/register')}
+                            className="text-blue-500 hover:text-blue-600"
+                        >
+                            Register
+                        </button>
+                    </div>
+                </form>
             </div>
-            <Footer />
         </div>
-    );
+   );
 };

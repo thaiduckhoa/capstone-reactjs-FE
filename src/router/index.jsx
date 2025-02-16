@@ -1,7 +1,6 @@
 import { useRoutes } from "react-router-dom";
 import { UserTemplate } from "../templates/UserTemplate/UserTemplate";
-import { Login, Page404, HomePage, Register, JobList, UserProfile } from "../pages"; 
-import { CatCard } from "../components";
+import { Login, Register, UserProfile, HomePage, JobList, Page404 }  from "../pages/index";
 
 export const Router = () => {
     return useRoutes([
@@ -35,9 +34,5 @@ export const Router = () => {
             path: "*",
             element: <Page404 />
         },
-        {
-            path:'/catcard',
-            element: <CatCard/>
-        }
     ]);
 };
