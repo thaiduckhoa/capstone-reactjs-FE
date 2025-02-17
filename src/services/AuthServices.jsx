@@ -1,4 +1,6 @@
 import { apiInstance } from "../Constants";
+import axios from "axios";
+
 
 const api = apiInstance({
     baseURL: 'https://fiverrnew.cybersoft.edu.vn/api/auth/',
@@ -55,7 +57,7 @@ const handleError = (error, action) => {
 export const authServices = {
     Register: async (payload) => {
         try {
-            const response = await api.post('/Signup', payload, {
+            const response = await api.get('/Signup', payload, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -71,7 +73,7 @@ export const authServices = {
     Login: async (payload) => {
         try {
             console.log('Attempting login with payload:', payload);
-            const response = await api.post('/Signin', payload);
+            const response = await axios.get('/signin', payload);
             console.log('Login successful, response:', response.data);
             return response.data;
         } catch (error) {
