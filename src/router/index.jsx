@@ -9,7 +9,7 @@ export const Router = () => {
             element: <UserTemplate />,
             children: [
                 {
-                    path: "/userprofile/:id",
+                    path: "/userprofile",
                     element: <UserProfile />
                 },
                 {

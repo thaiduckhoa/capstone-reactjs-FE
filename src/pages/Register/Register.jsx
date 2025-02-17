@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { RegisterSchema } from './Register.schema';
 import { authServices } from '../../services/AuthServices.jsx';
 import { message, Alert } from 'antd';
+
 import { useNavigate } from 'react-router-dom';
 
 export const Register = () => {
@@ -16,15 +17,16 @@ export const Register = () => {
     const onSubmit = async (data) => {
         setLoading(true);
         try {
-            const formattedData = {
-                ...data,
-                gender: data.gender === "Male",
-                role: data.role,
-                skill: [],
-                certification: []
-            };
+            const formData = new FormData();
+            Object.keys(data).forEach(key => {
+                if (key === 'profilePicture' && data[key]) {
+                    formData.append('file', data[key]);
+                } else {
+                    formData.append(key, data[key]);
+                }
+            });
 
-            await authServices.Register(formattedData);
+            await authServices.Register(formData);
             message.success("Registration successful!");
             navigate('/login');
         } catch (error) {
@@ -39,6 +41,7 @@ export const Register = () => {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -150,8 +153,21 @@ export const Register = () => {
                         {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message}</p>}
                     </div>
 
+                    {/* Profile Picture Field */}
+                    {/* <div>
+                        <label className="block text-sm font-medium mb-1">Profile Picture</label>
+                        <input
+                            {...register('profilePicture')}
+                            className="w-full px-3 py-2 border rounded-lg"
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.webp,.gif"
+                        />
+                        {errors.profilePicture && <p className="text-red-500 text-sm">{errors.profilePicture.message}</p>}
+                    </div> */}
+
                     {/* Role Field */}
                     <div>
+
                         <label className="block text-sm font-medium mb-1">Role</label>
                         <div className="flex gap-4">
                             <label className="flex items-center">

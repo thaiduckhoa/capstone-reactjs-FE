@@ -25,14 +25,9 @@ export const Login = () => {
         setLoading(true);
         try {
             const response = await authServices.Login(data);
-            // Store token if needed
-            if (response.token) {
-                localStorage.setItem('authToken', response.token);
-            }
-
-
             message.success("Login successful!");
-            navigate('/userprofile');
+            navigate(response.redirectTo || '/');
+
         } catch (error) {
             message.error(error.message || 'Login failed! Please try again later.');
         } finally {

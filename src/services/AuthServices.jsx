@@ -1,9 +1,9 @@
 import { apiInstance } from "../Constants";
 import axios from "axios";
-
+import { PATH } from "../Constants/PATH";
 
 const api = apiInstance({
-    baseURL: 'https://fiverrnew.cybersoft.edu.vn/api/auth/',
+    baseURL: 'https://fiverrnew.cybersoft.edu.vn/api',
 });
 
 // Centralized error handler
@@ -55,11 +55,11 @@ const handleError = (error, action) => {
 };
 
 export const authServices = {
-    Register: async (payload) => {
+    Register: async (formData) => {
         try {
-            const response = await api.get('/Signup', payload, {
+            const response = await api.post(PATH.AUTH.REGISTER, formData, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'multipart/form-data',
                 },
                 validateStatus: function (status) {
                     return status < 500; // Reject only if status is 500 or above
@@ -73,9 +73,18 @@ export const authServices = {
     Login: async (payload) => {
         try {
             console.log('Attempting login with payload:', payload);
-            const response = await axios.get('/signin', payload);
+            const response = await axios.get(PATH.AUTH.LOGIN, payload);
             console.log('Login successful, response:', response.data);
-            return response.data;
+            
+            // Store token if needed
+            if (response.data.token) {
+                localStorage.setItem('authToken', response.data.token);
+            }
+            
+            return {
+                ...response.data,
+                redirectTo: '/userprofile'
+            };
         } catch (error) {
             console.error('Login failed:', error);
             return handleError(error, 'Login');
@@ -89,6 +98,22 @@ export const authServices = {
         } catch (error) {
             console.error('Logout error:', error);
             return false;
+        }
+    },
+    
+    UpdateProfile: async (userId, profileData) => {
+        try {
+            const response = await api.put(PATH.USER.UPDATE_PROFILE(userId), profileData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                validateStatus: function (status) {
+                    return status < 500;
+                }
+            });
+            return response.data;
+        } catch (error) {
+            return handleError(error, 'Profile Update');
         }
     }
 };
